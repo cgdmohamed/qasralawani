@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'dreams' => [
+        'api_url' => env('DREAMS_API_URL', 'https://api.dreams.sa/sms'),
+        'api_key' => env('DREAMS_API_KEY'),
+        'sender_id' => env('DREAMS_SENDER_ID'),
+    ],
+
 ];

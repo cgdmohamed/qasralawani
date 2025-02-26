@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone_number',
+        'otp_code',
+        'otp_expires_at',
+        'has_claimed_coupon',
+        'is_admin',
     ];
 
     /**
@@ -31,6 +36,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+    
+    protected $dates = [
+        'otp_expires_at',
     ];
 
     /**
