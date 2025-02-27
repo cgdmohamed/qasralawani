@@ -13,13 +13,13 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        $totalUsers = User::count();
+        $totalUsers = Subscriber::count();
         $usedCoupons = Coupon::where('is_used', true)->count();
         $unusedCoupons = Coupon::where('is_used', false)->count();
 
         // For chart data: e.g., daily user signups
         // Example: group by date
-        $dailySignups = User::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        $dailySignups = Subscriber::selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
             ->get();
 
@@ -90,7 +90,7 @@ class AdminController extends Controller
     public function successfulCoupons()
     {
         $coupons = Coupon::where('is_used', true)
-            ->with('user')
+            ->with('subscriber')
             ->orderByDesc('used_at')
             ->paginate(20);
 

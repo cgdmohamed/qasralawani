@@ -20,6 +20,7 @@ return new class extends Migration
 
             // If referencing users table
             $table->foreign('used_by')->references('id')->on('users')->onDelete('set null');
+
         });
     }
 

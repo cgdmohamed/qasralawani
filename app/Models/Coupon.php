@@ -12,10 +12,14 @@ class Coupon extends Model
         'code',
         'is_used',
         'used_by',
+        'used_at', // if you want to mass-assign used_at as well
     ];
 
-    public function user()
+    /**
+     * Relationship to the subscriber who used the coupon.
+     */
+    public function subscriber()
     {
-        return $this->belongsTo(User::class, 'used_by');
+        return $this->belongsTo(\App\Models\Subscriber::class, 'used_by');
     }
 }
