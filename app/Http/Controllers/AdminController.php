@@ -99,20 +99,39 @@ class AdminController extends Controller
 
     public function stats()
     {
-        // daily used coupons
-        $dailyClaims = Coupon::selectRaw('DATE(used_at) as date, COUNT(*) as total')
-            ->whereNotNull('used_at')
+        // Total number of subscribers
+        $totalSubscribers = Subscriber::count();
+
+        // Total coupons, with breakdown
+        $totalCoupons = Coupon::count();
+        $usedCoupons    = Coupon::where('is_used', true)->count();
+        $unusedCoupons  = Coupon::where('is_used', false)->count();
+
+        // OTP stats:
+        // For this example, we assume that every subscriber record represents a successful OTP request.
+        // If you decide to track failed OTP requests (e.g., via a log or additional column), update accordingly.
+        $totalOtpSuccess = $totalSubscribers;
+        $totalOtpFailed  = 0; // Not tracked yet
+
+        // Daily OTP requests – count how many subscribers were created per day
+        $dailyOtp = Subscriber::selectRaw('DATE(created_at) as date, COUNT(*) as total')
             ->groupBy('date')
             ->orderBy('date', 'ASC')
             ->get();
 
-        $labels = $dailyClaims->pluck('date');   // e.g. ['2025-02-26', ...]
-        $counts = $dailyClaims->pluck('total');  // e.g. [5, 3, 10, ...]
+        $dailyLabels = $dailyOtp->pluck('date');
+        $dailyCounts = $dailyOtp->pluck('total');
 
-        $totalUsed = Coupon::where('is_used', true)->count();
-        $totalUnused = Coupon::where('is_used', false)->count();
-
-        return view('admin.stats', compact('labels', 'counts', 'totalUsed', 'totalUnused'));
+        return view('admin.stats', compact(
+            'totalSubscribers',
+            'totalCoupons',
+            'usedCoupons',
+            'unusedCoupons',
+            'totalOtpSuccess',
+            'totalOtpFailed',
+            'dailyLabels',
+            'dailyCounts'
+        ));
     }
     public function downloadDemoCsv()
     {
