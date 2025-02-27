@@ -6,25 +6,41 @@ use Illuminate\Support\Facades\Http;
 
 class SmsService
 {
-    public function sendSms($phoneNumber, $message)
+    /**
+     * Send an SMS using the Dreams.sa SMS API.
+     *
+     * @param string $phoneNumber Recipient phone number (e.g. "9665XXXXXXXX")
+     * @param string $message The message to send
+     * @param array $options Optional parameters (e.g. ['date' => 'YYYY-MM-DD', 'time' => 'HH:MM:SS'])
+     * @return mixed
+     */
+    public function sendSms(string $phoneNumber, string $message, array $options = [])
     {
-        $apiUrl = config('services.dreams.api_url');
-        $apiKey = config('services.dreams.api_key');
-        $senderId = config('services.dreams.sender_id');
+        // Get configuration values
+        $user       = config('services.dreams.user');
+        $secret_key = config('services.dreams.secret_key');
+        $sender     = config('services.dreams.sender');
+        $apiUrl     = config('services.dreams.api_url');
 
-        // According to Dreams.sa docs, you may need specific parameters for sending an SMS.
-        // This is a pseudo-example based on typical REST SMS gateways.
-        // Adjust keys (like 'to', 'text', 'sender') as required by Dreams.sa’s actual API.
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $apiKey,
-            'Accept' => 'application/json',
-        ])->post($apiUrl, [
-            'to' => $phoneNumber,
-            'text' => $message,
-            'sender' => $senderId,
-        ]);
+        // Build query parameters
+        $params = [
+            'user'       => $user,
+            'secret_key' => $secret_key,
+            'to'         => $phoneNumber,
+            'message'    => $message,
+            'sender'     => $sender,
+            'is_dlr'     => 1,  // request delivery report
+        ];
 
-        // Check response or return it
-        return $response->json();
+        // Merge any optional scheduling parameters (if provided)
+        if (!empty($options)) {
+            $params = array_merge($params, $options);
+        }
+
+        // Use a GET request as per the API docs.
+        $response = Http::get($apiUrl, $params);
+
+        // Optionally log or inspect $response->body() for debugging.
+        return $response->body();
     }
 }

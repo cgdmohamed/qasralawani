@@ -17,10 +17,15 @@ class AdminMiddleware
         //    abort(403, 'Unauthorized action.');
         // }
         // sqlite
-        if (!Auth::check() || !Auth::user()->is_admin) {
+        // If not authenticated, redirect to admin login
+        if (!Auth::check()) {
+            return redirect()->route('admin.login');
+        }
+
+        // If authenticated but not an admin, abort with 403
+        if (!Auth::user()->is_admin) {
             abort(403, 'Unauthorized action.');
         }
-        
 
         return $next($request);
     }

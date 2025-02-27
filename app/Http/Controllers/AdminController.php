@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Coupon;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Models\Subscriber;
 
 class AdminController extends Controller
 {
@@ -31,29 +34,28 @@ class AdminController extends Controller
         $coupons = Coupon::all();
         $filename = 'coupons_export_' . now()->format('YmdHis') . '.csv';
 
-        $headers = [
-            'Content-type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename=' . $filename,
-        ];
-
-        $callback = function () use ($coupons) {
-            $output = fopen('php://output', 'w');
+        $response = new StreamedResponse(function () use ($coupons) {
+            $handle = fopen('php://output', 'w');
             // CSV header
-            fputcsv($output, ['ID', 'Code', 'Is Used', 'Used By', 'Created At']);
+            fputcsv($handle, ['ID', 'Code', 'Is Used', 'Used By', 'Used At', 'Created At']);
 
             foreach ($coupons as $coupon) {
-                fputcsv($output, [
+                fputcsv($handle, [
                     $coupon->id,
                     $coupon->code,
                     $coupon->is_used ? 'Yes' : 'No',
                     $coupon->used_by,
+                    $coupon->used_at,
                     $coupon->created_at
                 ]);
             }
-            fclose($output);
-        };
+            fclose($handle);
+        });
 
-        return response()->stream($callback, 200, $headers);
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        return $response;
     }
     /**
      * Summary of importCoupons
@@ -70,11 +72,12 @@ class AdminController extends Controller
 
         if (($handle = fopen($file, 'r')) !== false) {
             while (($data = fgetcsv($handle, 1000, ',')) !== false) {
-                // Assuming the code is in the first column
+                // we only expect the coupon code in the first cell
                 $code = $data[0] ?? null;
                 if ($code) {
-                    // Create or skip duplicates
-                    Coupon::firstOrCreate(['code' => $code]);
+                    Coupon::firstOrCreate([
+                        'code' => trim($code),
+                    ]);
                 }
             }
             fclose($handle);
@@ -83,15 +86,99 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Coupons imported successfully!');
     }
 
+
     public function successfulCoupons()
     {
-        // Grab all used coupons, eager-load the user relationship
-        // (You could also paginate if you expect many records)
         $coupons = Coupon::where('is_used', true)
             ->with('user')
-            ->orderBy('updated_at', 'desc')
+            ->orderByDesc('used_at')
             ->paginate(20);
-    
+
         return view('admin.successful_coupons', compact('coupons'));
+    }
+
+    public function stats()
+    {
+        // daily used coupons
+        $dailyClaims = Coupon::selectRaw('DATE(used_at) as date, COUNT(*) as total')
+            ->whereNotNull('used_at')
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->get();
+
+        $labels = $dailyClaims->pluck('date');   // e.g. ['2025-02-26', ...]
+        $counts = $dailyClaims->pluck('total');  // e.g. [5, 3, 10, ...]
+
+        $totalUsed = Coupon::where('is_used', true)->count();
+        $totalUnused = Coupon::where('is_used', false)->count();
+
+        return view('admin.stats', compact('labels', 'counts', 'totalUsed', 'totalUnused'));
+    }
+    public function downloadDemoCsv()
+    {
+        $filename = 'demo_coupons.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function () {
+            $output = fopen('php://output', 'w');
+            // Optional: add a header row if you want
+            // fputcsv($output, ['coupon_code']);
+
+            // Write sample coupon codes
+            fputcsv($output, ['ABC123']);
+            fputcsv($output, ['DEF456']);
+            fputcsv($output, ['GHI789']);
+            fputcsv($output, ['JKL012']);
+            fclose($output);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Display a paginated list of subscribers.
+     */
+    public function subscribersList(Request $request)
+    {
+        // Fetch subscribers with pagination (e.g. 20 per page)
+        $subscribers = Subscriber::orderBy('created_at', 'desc')->paginate(20);
+
+        return view('admin.subscribers', compact('subscribers'));
+    }
+
+    /**
+     * Export all subscribers as a CSV file.
+     */
+    public function exportSubscribers()
+    {
+        $filename = 'subscribers_export_' . now()->format('YmdHis') . '.csv';
+
+        $response = new StreamedResponse(function () {
+            $handle = fopen('php://output', 'w');
+
+            // Optional: write a header row
+            fputcsv($handle, ['ID', 'Name', 'Email', 'Phone Number', 'Created At']);
+
+            // Retrieve all subscribers
+            $subscribers = Subscriber::orderBy('created_at', 'desc')->get();
+            foreach ($subscribers as $subscriber) {
+                fputcsv($handle, [
+                    $subscriber->id,
+                    $subscriber->name,
+                    $subscriber->email,
+                    $subscriber->phone_number,
+                    $subscriber->created_at,
+                ]);
+            }
+            fclose($handle);
+        });
+
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', "attachment; filename=\"$filename\"");
+
+        return $response;
     }
 }

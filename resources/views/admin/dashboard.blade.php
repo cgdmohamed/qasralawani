@@ -1,53 +1,42 @@
-@extends('layouts.app')
+<!-- resources/views/admin/dashboard.blade.php -->
+@extends('layouts.admin')
 
 @section('content')
-<div class="row">
-    <div class="col-md-12">
-        <h2>Admin Dashboard</h2>
-        <hr/>
+<h2>Admin Dashboard</h2>
+<hr/>
 
-        <!-- Display analytics (example) -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card text-white bg-info mb-3">
-                    <div class="card-header">Total Users</div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $totalUsers }}</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card text-white bg-success mb-3">
-                    <div class="card-header">Used Coupons</div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $usedCoupons }}</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card text-white bg-warning mb-3">
-                    <div class="card-header">Unused Coupons</div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $unusedCoupons }}</h5>
-                    </div>
-                </div>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-header">Total Users</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ $totalUsers }}</h5>
             </div>
         </div>
+    </div>
 
-        <!-- Chart example (if using a JS library) -->
-        {{-- 
-        <canvas id="signupChart" width="400" height="150"></canvas>
-        <script>
-            const data = @json($dailySignups);
-            // You can integrate Chart.js or any library to display the data
-        </script>
-        --}}
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-header">Used Coupons</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ $usedCoupons }}</h5>
+            </div>
+        </div>
+    </div>
 
-        <hr/>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-header">Unused Coupons</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ $unusedCoupons }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
 
-        <!-- Import Coupons Form -->
+<!-- Import & Export -->
+<div class="row">
+    <div class="col-md-6">
         <h4>Import Coupons</h4>
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -62,29 +51,25 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.import.coupons') }}" method="POST" enctype="multipart/form-data" class="mb-3">
+        <form action="{{ route('admin.import.coupons') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="mb-3">
-                <label for="csv_file" class="form-label">CSV File</label>
+                <label for="csv_file" class="form-label">CSV File (only coupon codes)</label>
                 <input type="file" name="csv_file" id="csv_file" accept=".csv" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-primary">Import</button>
+            <a href="{{ route('admin.demo.csv') }}" class="btn btn-info">
+                Download Demo CSV File
+            </a>
         </form>
 
-        <!-- Export Coupons Link -->
+    </div>
+
+    <div class="col-md-6">
         <h4>Export Coupons</h4>
-        <a href="{{ route('admin.export.coupons') }}" class="btn btn-secondary">Export Coupons as CSV</a>
-        <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
-            @csrf
-        </form>
-        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            Logout
+        <a href="{{ route('admin.export.coupons') }}" class="btn btn-secondary">
+            Export Coupons as CSV
         </a>
-        
-        <a href="{{ route('admin.successful.coupons') }}" class="btn btn-info">
-            View Used Coupons
-        </a>
-        
     </div>
 </div>
 @endsection

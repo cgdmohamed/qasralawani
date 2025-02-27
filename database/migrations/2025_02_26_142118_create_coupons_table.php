@@ -17,7 +17,7 @@ return new class extends Migration
             $table->boolean('is_used')->default(false);
             $table->unsignedBigInteger('used_by')->nullable();
             $table->timestamps();
-    
+
             // If referencing users table
             $table->foreign('used_by')->references('id')->on('users')->onDelete('set null');
         });
