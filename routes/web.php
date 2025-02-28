@@ -35,7 +35,7 @@ Route::get('/admin', function () {
     return redirect()->route('admin.dashboard');
 })->middleware('admin');
 
-Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login.form');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
