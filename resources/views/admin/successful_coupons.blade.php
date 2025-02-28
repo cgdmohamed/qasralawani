@@ -1,15 +1,15 @@
 @extends('layouts.admin')
 
 @section('content')
-    <h2>Used Coupons</h2>
+    <h2>{{ __('messages.used_coupons') }}</h2>
     <hr />
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Code</th>
-                <th>Used By (Phone)</th>
-                <th>Used At</th>
+                <th>{{ __('messages.id') }}</th>
+                <th>{{ __('messages.code') }}</th>
+                <th>{{ __('messages.used_by_phone') }}</th>
+                <th>{{ __('messages.used_at') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -24,7 +24,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4">No used coupons.</td>
+                    <td colspan="4">{{ __('messages.no_used_coupons') }}</td>
                 </tr>
             @endforelse
         </tbody>

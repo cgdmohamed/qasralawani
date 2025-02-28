@@ -4,9 +4,9 @@
 <div class="row justify-content-center">
     <div class="col-md-6 text-center">
 
-        <h3>Coupon Already Claimed</h3>
+        <h3>{{ __('messages.coupon_already_claimed') }}</h3>
         <div class="alert alert-info">
-            You have already received a coupon code. Please check your SMS messages.
+            {{ __('messages.coupon_message') }}
         </div>
 
     </div>

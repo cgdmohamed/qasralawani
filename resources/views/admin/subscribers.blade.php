@@ -1,22 +1,22 @@
 @extends('layouts.admin')
 
 @section('content')
-    <h2>Subscribers List</h2>
+    <h2>{{ __('messages.subscribers_list') }}</h2>
 
     <div class="mb-3">
         <a href="{{ route('admin.export.subscribers') }}" class="btn btn-info">
-            Download Subscribers CSV
+            {{ __('messages.download_subscribers_csv') }}
         </a>
     </div>
 
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone Number</th>
-                <th>Subscribed At</th>
+                <th>{{ __('messages.id') }}</th>
+                <th>{{ __('messages.name') }}</th>
+                <th>{{ __('messages.email') }}</th>
+                <th>{{ __('messages.phone_number') }}</th>
+                <th>{{ __('messages.subscribed_at') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -30,7 +30,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5">No subscribers found.</td>
+                    <td colspan="5">{{ __('messages.no_subscribers') }}</td>
                 </tr>
             @endforelse
         </tbody>

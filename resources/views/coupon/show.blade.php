@@ -4,13 +4,13 @@
 <div class="row justify-content-center">
     <div class="col-md-6 text-center">
 
-        <h3 class="mb-4">Congratulations!</h3>
-        <p>Your coupon code is:</p>
+        <h3 class="mb-4">{{ __('messages.congratulations') }}</h3>
+        <p>{{ __('messages.your_coupon_code') }}</p>
         <div class="alert alert-success display-5" role="alert">
             <strong>{{ $couponCode }}</strong>
         </div>
 
-        <p>We've also sent this code to your phone via SMS.</p>
+        <p>{{ __('messages.coupon_sent_sms') }}</p>
     </div>
 </div>
 @endsection

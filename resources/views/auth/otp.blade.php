@@ -4,11 +4,11 @@
 <div class="row justify-content-center">
     <div class="col-md-6">
 
-        <h3>Enter the OTP Code</h3>
+        <h3>{{ __('messages.enter_otp_code') }}</h3>
 
         <!-- Error / success messages -->
         @if(session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
+            <div class="alert alert-danger">{{ __('messages.error_message') }}</div>
         @endif
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -24,16 +24,16 @@
         <form action="{{ route('otp.verify') }}" method="POST">
             @csrf
 
-            <input type="hidden" name="phone_number" 
+            <input type="hidden" name="phone_number"
                    value="{{ session('phone_number') ?? old('phone_number') }}">
 
             <div class="mb-3">
-                <label for="otp_code" class="form-label">OTP Code</label>
-                <input type="text" name="otp_code" id="otp_code" 
+                <label for="otp_code" class="form-label">{{ __('messages.otp_code') }}</label>
+                <input type="text" name="otp_code" id="otp_code"
                        class="form-control" required>
             </div>
 
-            <button type="submit" class="btn btn-primary">Verify OTP</button>
+            <button type="submit" class="btn btn-primary">{{ __('messages.verify_otp') }}</button>
         </form>
     </div>
 </div>

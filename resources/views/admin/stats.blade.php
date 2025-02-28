@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container">
-        <h2>Rich Coupon & OTP Stats</h2>
+        <h2>{{ __('messages.admin_stats') }}</h2>
         <hr />
 
         <!-- Overall Metrics -->
@@ -10,7 +10,7 @@
             <!-- Total Subscribers -->
             <div class="col-md-3">
                 <div class="card text-white bg-primary">
-                    <div class="card-header">Total Subscribers</div>
+                    <div class="card-header">{{ __('messages.total_subscribers') }}</div>
                     <div class="card-body">
                         <h5 class="card-title">{{ $totalSubscribers }}</h5>
                     </div>
@@ -19,7 +19,7 @@
             <!-- Total Coupons -->
             <div class="col-md-3">
                 <div class="card text-white bg-info">
-                    <div class="card-header">Total Coupons</div>
+                    <div class="card-header">{{ __('messages.total_coupons') }}</div>
                     <div class="card-body">
                         <h5 class="card-title">{{ $totalCoupons }}</h5>
                     </div>
@@ -28,7 +28,7 @@
             <!-- Used Coupons -->
             <div class="col-md-3">
                 <div class="card text-white bg-success">
-                    <div class="card-header">Used Coupons</div>
+                    <div class="card-header">{{ __('messages.used_coupons') }}</div>
                     <div class="card-body">
                         <h5 class="card-title">{{ $usedCoupons }}</h5>
                     </div>
@@ -37,7 +37,7 @@
             <!-- Unused Coupons -->
             <div class="col-md-3">
                 <div class="card text-white bg-warning">
-                    <div class="card-header">Unused Coupons</div>
+                    <div class="card-header">{{ __('messages.unused_coupons') }}</div>
                     <div class="card-body">
                         <h5 class="card-title">{{ $unusedCoupons }}</h5>
                     </div>
@@ -49,7 +49,7 @@
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="card text-white bg-secondary">
-                    <div class="card-header">OTP Requests Successful</div>
+                    <div class="card-header">{{ __('messages.otp_requests_successful') }}</div>
                     <div class="card-body">
                         <h5 class="card-title">{{ $totalOtpSuccess }}</h5>
                     </div>
@@ -57,7 +57,7 @@
             </div>
             <div class="col-md-6">
                 <div class="card text-white bg-danger">
-                    <div class="card-header">OTP Requests Failed</div>
+                    <div class="card-header">{{ __('messages.otp_requests_failed') }}</div>
                     <div class="card-body">
                         <h5 class="card-title">{{ $totalOtpFailed }}</h5>
                     </div>
@@ -67,12 +67,12 @@
 
         <!-- Charts -->
         <div class="mb-4">
-            <h4>Daily OTP Requests</h4>
+            <h4>{{ __('messages.daily_otp_requests') }}</h4>
             <canvas id="dailyOtpChart" width="400" height="200"></canvas>
         </div>
 
         <div class="mb-4">
-            <h4>Used vs. Unused Coupons</h4>
+            <h4>{{ __('messages.used_vs_unused_coupons') }}</h4>
             <canvas id="couponsChart" width="400" height="200"></canvas>
         </div>
     </div>
@@ -90,7 +90,7 @@
                 data: {
                     labels: dailyLabels,
                     datasets: [{
-                        label: 'Daily OTP Requests',
+                        label: '{{ __('messages.daily_otp_requests') }}',
                         data: dailyCounts,
                         borderColor: 'rgb(54, 162, 235)',
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
@@ -114,7 +114,7 @@
             new Chart(ctx2, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Used', 'Unused'],
+                    labels: ['{{ __('messages.used_coupons') }}', '{{ __('messages.unused_coupons') }}'],
                     datasets: [{
                         data: [{{ $usedCoupons }}, {{ $unusedCoupons }}],
                         backgroundColor: [

@@ -5,14 +5,21 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\LanguageController;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\App;
+
+// ===================================
+// Language Switcher Route (Moved to Controller)
+// ===================================
+Route::get('lang/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 // ===================================
 // Public Routes (User OTP Flow)
 // ===================================
 Route::redirect('/', '/otp-request');
 
-
-// User OTP
+// User OTP Routes
 Route::get('/otp-request', [AuthController::class, 'showPhoneForm'])->name('otp.request.form');
 Route::post('/otp-request', [AuthController::class, 'requestOtp'])->name('otp.request');
 Route::get('/otp-verify', [AuthController::class, 'showOtpForm'])->name('otp.verify.form');
@@ -22,13 +29,11 @@ Route::post('/otp-verify', [AuthController::class, 'verifyOtp'])->name('otp.veri
 Route::get('/coupon', [CouponController::class, 'showCoupon'])->name('coupon.show');
 
 // ===================================
-// Admin Auth
+// Admin Auth Routes
 // ===================================
-
 Route::get('/admin', function () {
     return redirect()->route('admin.dashboard');
 })->middleware('admin');
-
 
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
@@ -56,7 +61,6 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/admin/stats', [AdminController::class, 'stats'])
         ->name('admin.stats');
 
-    // Inside your admin middleware group:
     Route::get('/admin/demo-csv', [AdminController::class, 'downloadDemoCsv'])
         ->name('admin.demo.csv');
 
@@ -73,6 +77,5 @@ Route::middleware(['admin'])->group(function () {
 // Fallback Route
 // ===================================
 Route::fallback(function () {
-    // Show a 404 page or redirect to a default route
-    return redirect()->route('/admin/login');
+    return redirect()->route('admin.login');
 });
