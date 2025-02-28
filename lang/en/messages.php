@@ -1,8 +1,9 @@
 <?php
 
 return [
-    'welcome' => 'مرحبا',
-    'login' => 'تسجيل الدخول',
+    'gift_for_you' => 'Gift for you',
+    'enter_your_phone_number_and_receive'=> 'Enter your phone number and receive',
+    '15_discount_code' => 'A 15% Discount coupon code',
     'coupon_system' => 'Coupon System',
     'enter_your_details' => 'Enter Your Details',
     "name" => "Name",
@@ -66,6 +67,7 @@ return [
     "used_by_phone" => "Used By (Phone)",
     "used_at" => "Used At",
     "no_used_coupons" => "No used coupons.",
+    'all_rights_reserved' => 'All rights reserved'
 
 
 

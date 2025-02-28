@@ -76,6 +76,6 @@ Route::middleware(['admin'])->group(function () {
 // ===================================
 // Fallback Route
 // ===================================
-Route::fallback(function () {
-    return redirect()->route('admin.login');
-});
+// Route::fallback(function () {
+//     return redirect()->route('admin.login');
+// });

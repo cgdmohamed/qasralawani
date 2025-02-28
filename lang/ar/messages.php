@@ -1,7 +1,9 @@
 <?php
 
 return [
-    'welcome' => 'مرحبا',
+    'gift_for_you' => 'هدايا قصر الاواني',
+    'enter_your_phone_number_and_receive'=> 'أدخل رقم جوالك واحصل على',
+    '15_discount_code' => 'كود خصم 15% من المتجر',
     'login' => 'تسجيل الدخول',
     'coupon_system' => 'نظام الكوبونات',
     "enter_your_details" => "أدخل بياناتك",
@@ -9,7 +11,7 @@ return [
     "name_placeholder" => "اسمك",
     "email" => "البريد الإلكتروني (اختياري)",
     "email_placeholder" => "عنوان بريدك الإلكتروني",
-    "phone" => "رقم الهاتف (السعودية)",
+    "phone" => "رقم الجوال",
     "phone_placeholder" => "05XXXXXXXX أو +9665XXXXXXXX",
     "request_otp" => "طلب رمز التحقق",
     "enter_otp_code" => "أدخل رمز التحقق",
@@ -66,6 +68,8 @@ return [
     "used_by_phone" => "تم الاستخدام بواسطة (الهاتف)",
     "used_at" => "تاريخ الاستخدام",
     "no_used_coupons" => "لا توجد قسائم مستخدمة.",
+    'all_rights_reserved' => 'جميع الحقوق محفوظة'
+
 
 
 

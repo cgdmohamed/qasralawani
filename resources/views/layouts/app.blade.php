@@ -4,52 +4,52 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>{{ __('messages.coupon_system')}}</title>
-    <!-- Bootstrap CSS (CDN) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{{ __('messages.coupon_system') }}</title>
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
+    <link href="https://cdn.lineicons.com/5.0/lineicons.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">{{ __('messages.coupon_system')}}</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <!-- Add links for Admin Dashboard or Logout if needed -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.dashboard') }}">Admin</a>
-                    </li>
-                </ul>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="languageDropdown"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ app()->getLocale() == 'ar' ? 'العربية' : 'English' }}
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="languageDropdown">
-                        <li>
-                            <a class="dropdown-item" href="{{ route('language.switch', 'en') }}">
-                                🇬🇧 English
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ route('language.switch', 'ar') }}">
-                                🇸🇦 العربية
-                            </a>
-                        </li>
-                    </ul>
+            <div class="row w-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <a class="navbar-brand" href="#"><img src="{{ asset('img/Logo.png') }}" class="w-75"
+                            alt="Logo"></a>
+                    <div class="language-switcher" onclick="switchLanguage()">
+                        @if (app()->getLocale() == 'ar')
+                            EN
+                        @else
+                            ع
+                        @endif
+                    </div>
                 </div>
-
             </div>
+
         </div>
     </nav>
 
     <div class="container my-4">
-        <!-- Main content here -->
         @yield('content')
     </div>
 
-    <!-- Bootstrap JS (optional if you need interactivity) -->
+    <script>
+        function switchLanguage() {
+            let currentLang = "{{ app()->getLocale() }}";
+            let newLang = currentLang === "ar" ? "en" : "ar";
+            window.location.href = "{{ route('language.switch', '') }}/" + newLang;
+        }
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Include Footer -->
+    @include('footer')
+
 </body>
 
 </html>

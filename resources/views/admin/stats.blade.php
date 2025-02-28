@@ -66,14 +66,19 @@
         </div>
 
         <!-- Charts -->
-        <div class="mb-4">
-            <h4>{{ __('messages.daily_otp_requests') }}</h4>
-            <canvas id="dailyOtpChart" width="400" height="200"></canvas>
-        </div>
-
-        <div class="mb-4">
-            <h4>{{ __('messages.used_vs_unused_coupons') }}</h4>
-            <canvas id="couponsChart" width="400" height="200"></canvas>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-4">
+                    <h4>{{ __('messages.daily_otp_requests') }}</h4>
+                    <canvas id="dailyOtpChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-4">
+                    <h4>{{ __('messages.used_vs_unused_coupons') }}</h4>
+                    <canvas id="couponsChart" width="400" height="200"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
