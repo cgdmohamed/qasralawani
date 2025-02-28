@@ -4,28 +4,26 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Session;
 
-
 class SetLocale
 {
-/**
+    /**
      * Handle an incoming request.
      */
     public function handle(Request $request, Closure $next)
     {
+        // Check if the user has already selected a language
         if (Session::has('locale')) {
             $locale = Session::get('locale');
         } else {
-            $locale = substr($request->server('HTTP_ACCEPT_LANGUAGE'), 0, 2);
-            if (!in_array($locale, ['en', 'ar'])) {
-                $locale = config('app.fallback_locale');
-            }
+            // Always default to Arabic (ar) unless the user selects another language
+            $locale = 'ar';
             Session::put('locale', $locale);
         }
 
+        // Set application locale
         App::setLocale($locale);
 
         return $next($request);
