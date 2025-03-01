@@ -52,6 +52,18 @@
                                 class="lni lni-phone"></i>
                             {{ __('messages.request_otp') }}</button>
                     </div>
+                    <input type="hidden" name="g-recaptcha-response" id="recaptcha">
+                    <script src="https://www.google.com/recaptcha/api.js?render={{ env('RECAPTCHA_SITE_KEY') }}"></script>
+                    <script>
+                        grecaptcha.ready(function() {
+                            grecaptcha.execute('{{ env('RECAPTCHA_SITE_KEY') }}', {
+                                action: 'submit'
+                            }).then(function(token) {
+                                document.getElementById('recaptcha').value = token;
+                            });
+                        });
+                    </script>
+
                 </form>
             </div>
         </div>
