@@ -9,8 +9,8 @@ return [
     "enter_your_details" => "أدخل بياناتك",
     "name" => "الاسم",
     "name_placeholder" => "اسمك",
-    "email" => "البريد الإلكتروني (اختياري)",
-    "email_placeholder" => "عنوان بريدك الإلكتروني",
+    "email" => "البريد الإلكتروني",
+    "email_placeholder" => "بريدك الإلكتروني (اختياري)",
     "phone" => "رقم الجوال",
     "phone_placeholder" => "05XXXXXXXX أو +9665XXXXXXXX",
     "request_otp" => "طلب رمز التحقق",
@@ -68,10 +68,10 @@ return [
     "used_by_phone" => "تم الاستخدام بواسطة (الهاتف)",
     "used_at" => "تاريخ الاستخدام",
     "no_used_coupons" => "لا توجد قسائم مستخدمة.",
-    'all_rights_reserved' => 'جميع الحقوق محفوظة'
-
-
-
-
+    'all_rights_reserved' => 'جميع الحقوق محفوظة',
+    //otp messages
+    'otp_sent' => 'تم إرسال رمز التحقق إلى هاتفك.',
+    'otp_invalid' => 'رمز التحقق غير صحيح، يرجى المحاولة مرة أخرى.',
+    'otp_verified' => 'تم التحقق من رمز التحقق بنجاح.',
 
 ];

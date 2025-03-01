@@ -2,7 +2,7 @@
 
 return [
     'gift_for_you' => 'Gift for you',
-    'enter_your_phone_number_and_receive'=> 'Enter your phone number and receive',
+    'enter_your_phone_number_and_receive' => 'Enter your phone number and receive',
     '15_discount_code' => 'A 15% Discount coupon code',
     'coupon_system' => 'Coupon System',
     'enter_your_details' => 'Enter Your Details',
@@ -67,7 +67,11 @@ return [
     "used_by_phone" => "Used By (Phone)",
     "used_at" => "Used At",
     "no_used_coupons" => "No used coupons.",
-    'all_rights_reserved' => 'All rights reserved'
+    'all_rights_reserved' => 'All rights reserved',
+    // otp messages
+    'otp_sent' => 'An OTP has been sent to your phone.',
+    'otp_invalid' => 'Invalid OTP, please try again.',
+    'otp_verified' => 'Your OTP has been verified successfully.',
 
 
 

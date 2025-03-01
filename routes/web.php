@@ -6,8 +6,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\LanguageController;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\App;
+use App\Http\Middleware\VerifyRecaptcha;
+
 
 // ===================================
 // Language Switcher Route (Moved to Controller)
@@ -21,7 +21,7 @@ Route::redirect('/', '/otp-request');
 
 // User OTP Routes
 Route::get('/otp-request', [AuthController::class, 'showPhoneForm'])->name('otp.request.form');
-Route::post('/otp-request', [AuthController::class, 'requestOtp'])->name('otp.request');
+Route::post('/otp-request', [AuthController::class, 'requestOtp'])->middleware(VerifyRecaptcha::class)->name('otp.request');
 Route::get('/otp-verify', [AuthController::class, 'showOtpForm'])->name('otp.verify.form');
 Route::post('/otp-verify', [AuthController::class, 'verifyOtp'])->name('otp.verify');
 
@@ -36,7 +36,7 @@ Route::get('/admin', function () {
 })->middleware('admin');
 
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login.form');
-Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->middleware(VerifyRecaptcha::class)->name('admin.login');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 // ===================================
@@ -71,11 +71,7 @@ Route::middleware(['admin'])->group(function () {
     // Download subscribers list as CSV
     Route::get('/admin/export-subscribers', [AdminController::class, 'exportSubscribers'])
         ->name('admin.export.subscribers');
-});
 
-// ===================================
-// Fallback Route
-// ===================================
-// Route::fallback(function () {
-//     return redirect()->route('admin.login');
-// });
+    // Coupon Search
+    Route::get('/coupons/search', [CouponController::class, 'search'])->name('coupons.search');
+});

@@ -105,70 +105,7 @@ class AuthController extends Controller
         // Show a form where user inputs the OTP
         return view('auth.otp');
     }
-    /*
-    public function verifyOtp(Request $request)
-    {
-        $request->validate([
-            'phone_number' => 'required',
-            'otp_code'     => 'required|numeric',
-        ]);
 
-        // Use the Subscriber model since phone numbers are stored there.
-        $subscriber = Subscriber::where('phone_number', $request->phone_number)->first();
-
-        if (!$subscriber) {
-            return back()->withErrors(['phone_number' => 'Phone not found.']);
-        }
-
-        // Rate limit OTP verification attempts.
-        $rateLimitKey = 'otp-verify:' . $subscriber->phone_number;
-        if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
-            $seconds = RateLimiter::availableIn($rateLimitKey);
-            return back()->withErrors(['otp_code' => "Too many attempts. Try again in {$seconds}s"]);
-        }
-        RateLimiter::hit($rateLimitKey, 300); // e.g., 5 min decay
-
-        // Verify OTP: ensure the OTP matches and hasn't expired.
-        if ($subscriber->otp_code == $request->otp_code
-            && $subscriber->otp_expires_at
-            && $subscriber->otp_expires_at->isFuture()) {
-
-            // Clear OTP values.
-            $subscriber->otp_code = null;
-            $subscriber->otp_expires_at = null;
-            $subscriber->save();
-
-            // Retrieve an unused coupon.
-            $coupon = Coupon::whereNull('used_at')->first();
-            if (!$coupon) {
-                return back()->withErrors(['coupon' => 'No coupon available at the moment.']);
-            }
-
-            // Mark the coupon as used and, if desired, associate it with this subscriber.
-            $coupon->used_at = Carbon::now();
-            $coupon->subscriber_id = $subscriber->id; // ensure your coupons table has this column, if needed
-            $coupon->save();
-
-            // Prepare the coupon SMS message.
-            $smsMessage = "Congratulations! Your coupon code is: {$coupon->code}";
-
-            // Send the coupon code via SMS.
-            $this->smsService->sendSms($subscriber->phone_number, $smsMessage);
-
-            // Clear rate limit attempts on success.
-            RateLimiter::clear($rateLimitKey);
-
-            // Redirect to the coupon display page, optionally with the coupon code.
-            return redirect()->route('coupon.show')->with([
-                'phone_number' => $subscriber->phone_number,
-                'coupon_code'  => $coupon->code,
-            ]);
-        }
-
-        // OTP invalid or expired.
-        return back()->withErrors(['otp_code' => 'Invalid or expired OTP.']);
-    }
-*/
     public function verifyOtp(Request $request)
     {
         $request->validate([

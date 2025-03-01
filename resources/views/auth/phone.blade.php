@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="box p-2 text-light rounded">
+    <div class="box p-4 text-light rounded">
         <div class=" p-2 mb-3">
             <h1 class="text-center fw-bold">
                 {{ __('messages.gift_for_you') }}
@@ -46,7 +46,7 @@
                             placeholder="{{ __('messages.phone_placeholder') }}" value="{{ old('phone_number') }}"
                             required>
                     </div>
-                    <div class="box-footer rounded p-3">
+                    <div class="box-footer rounded p-3 mt-5 mb-4">
                         <button type="submit"
                             class="btn btn-lg text-white fw-bold w-100 d-flex align-items-center justify-content-center"> <i
                                 class="lni lni-phone"></i>

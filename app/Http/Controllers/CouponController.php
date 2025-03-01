@@ -116,4 +116,28 @@ class CouponController extends Controller
         // Display the coupon code page.
         return view('coupon.show', ['couponCode' => $coupon->code]);
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $coupons = Coupon::where('code', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->get();
+
+        return response()->json($coupons);
+    }
+    /**
+     * Delete coupons
+     */
+
+    public function destroy(Coupon $coupon)
+    {
+        if ($coupon->orders()->exists()) {
+            return back()->withErrors(['error' => 'Coupon is already assigned and cannot be deleted.']);
+        }
+
+        $coupon->delete();
+        return redirect()->route('coupons.index')->with('success', 'Coupon deleted successfully.');
+    }
 }
