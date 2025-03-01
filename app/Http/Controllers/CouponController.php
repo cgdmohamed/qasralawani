@@ -3,61 +3,117 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\Subscriber;
 use App\Models\Coupon;
-use Illuminate\Support\Facades\Auth;
+use App\Services\SmsService;
 
 class CouponController extends Controller
 {
+    protected $smsService;
+
+    public function __construct(SmsService $smsService)
+    {
+        $this->smsService = $smsService;
+    }
+    /*
     public function showCoupon(Request $request)
     {
-        // We assume the user’s phone is in session or we fetch from DB
-        // For a small project, you might keep phone in session after verifying OTP
-        // e.g., session('phone_number') or pass phone in a query param
-
-        $phoneNumber = session('phone_number'); // example approach
+        // Retrieve the phone number from session (set during OTP verification)
+        $phoneNumber = session('phone_number');
         if (!$phoneNumber) {
-            // Or handle differently if phone number is not in session
             return redirect()->route('otp.request.form')->withErrors('Phone number missing');
         }
 
-        $user = User::where('phone_number', $phoneNumber)->first();
-        if (!$user) {
+        // Look up the subscriber by phone number.
+        $subscriber = Subscriber::where('phone_number', $phoneNumber)->first();
+        if (!$subscriber) {
             return redirect()->route('otp.request.form')->withErrors('User not found');
         }
 
-        // Check if already claimed
-        if ($user->has_claimed_coupon) {
-            // Show a message that they already have a coupon
-            return view('coupon.already_claimed');
+        // If coupon code is already in session, fetch that coupon.
+        if (session()->has('coupon_code')) {
+            $couponCode = session('coupon_code');
+            // Make sure to retrieve coupon record if needed.
+            $coupon = Coupon::where('code', $couponCode)->first();
+            if ($coupon) {
+                return view('coupon.show', ['couponCode' => $coupon->code]);
+            }
         }
 
-        // Else find an unused coupon
-        $coupon = Coupon::where('is_used', false)->first();
+        // Check if the subscriber has already been assigned a coupon.
+        $coupon = Coupon::where('used_by', $subscriber->id)->first();
+        if ($coupon) {
+            session(['coupon_code' => $coupon->code]);
+            return view('coupon.show', ['couponCode' => $coupon->code]);
+        }
 
+        // Retrieve an unused coupon.
+        $coupon = Coupon::where('is_used', false)->first();
         if (!$coupon) {
-            // No coupons left
             return view('coupon.no_coupons');
         }
 
-        // Mark coupon as used
+        // Mark coupon as used and associate it with the subscriber.
         $coupon->is_used = true;
-        $coupon->used_by = $user->id;
+        $coupon->used_by = $subscriber->id;
         $coupon->save();
 
-        // Mark user as having claimed
-        $user->has_claimed_coupon = true;
-        $user->save();
+        // Mark the subscriber as having claimed a coupon.
+        $subscriber->has_claimed_coupon = true;
+        $subscriber->save();
 
-        // Send coupon code via SMS (pseudo-code)
-        /*
-        Http::post('https://api.dreams.sa/send', [
-            'phone_number' => $phoneNumber,
-            'message' => "Your coupon code is: {$coupon->code}"
-        ]);
-        */
+        // Store the coupon code in the session.
+        session(['coupon_code' => $coupon->code]);
 
-        // Return a view with the coupon code
+        // Send coupon code via SMS.
+        $smsMessage = "Congratulations! Your coupon code is: {$coupon->code}";
+        $this->smsService->sendSms($subscriber->phone_number, $smsMessage);
+
+        // Display the coupon code page.
+        return view('coupon.show', ['couponCode' => $coupon->code]);
+    }
+*/
+    public function showCoupon(Request $request)
+    {
+        // Retrieve the phone number from session (set after OTP verification)
+        $phoneNumber = session('phone_number');
+        if (!$phoneNumber) {
+            return redirect()->route('otp.request.form')->withErrors('Phone number missing');
+        }
+
+        // Look up the subscriber by phone number.
+        $subscriber = Subscriber::where('phone_number', $phoneNumber)->first();
+        if (!$subscriber) {
+            return redirect()->route('otp.request.form')->withErrors('User not found');
+        }
+
+        // Check if the subscriber already has a coupon assigned.
+        $coupon = Coupon::where('used_by', $subscriber->id)->first();
+        if ($coupon) {
+            // Coupon already assigned—no need to send a new OTP or reassign.
+            return view('coupon.show', ['couponCode' => $coupon->code]);
+        }
+
+        // Otherwise, assign a new coupon.
+        $coupon = Coupon::where('is_used', false)->first();
+        if (!$coupon) {
+            return view('coupon.no_coupons');
+        }
+
+        // Mark the coupon as used and associate it with the subscriber.
+        $coupon->is_used = true;
+        $coupon->used_by = $subscriber->id;
+        $coupon->save();
+
+        // Mark the subscriber as having claimed a coupon.
+        $subscriber->has_claimed_coupon = true;
+        $subscriber->save();
+
+        // Send the coupon code via SMS.
+        $smsMessage = "Congratulations! Your coupon code is: {$coupon->code}";
+        $this->smsService->sendSms($subscriber->phone_number, $smsMessage);
+
+        // Display the coupon code page.
         return view('coupon.show', ['couponCode' => $coupon->code]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SmsService
 {
@@ -37,10 +38,20 @@ class SmsService
             $params = array_merge($params, $options);
         }
 
-        // Use a GET request as per the API docs.
-        $response = Http::get($apiUrl, $params);
+        // Log the outgoing request parameters for debugging purposes.
+        Log::info('Sending SMS via Dreams API', ['url' => $apiUrl, 'params' => $params]);
 
-        // Optionally log or inspect $response->body() for debugging.
+        try {
+            // Use a GET request as per the API docs.
+            $response = Http::get($apiUrl, $params);
+
+            // Log the response for debugging purposes.
+            Log::info('Received response from Dreams API', ['response' => $response->body()]);
+        } catch (\Exception $e) {
+            Log::error('Error sending SMS via Dreams API', ['error' => $e->getMessage()]);
+            return null;
+        }
+
         return $response->body();
     }
 }

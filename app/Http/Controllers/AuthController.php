@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Subscriber;
 use Carbon\Carbon;
-
+use App\Models\Coupon;
 use App\Services\SmsService;
 use Illuminate\Support\Facades\RateLimiter;
 
@@ -24,10 +24,9 @@ class AuthController extends Controller
     {
         return view('auth.phone');
     }
-
     public function requestOtp(Request $request)
     {
-        // Validate input: name and phone are required; email is optional.
+        // Validate input: phone number is required.
         $request->validate([
             'phone_number' => ['required', function ($attribute, $value, $fail) {
                 if (!(str_starts_with($value, '05') || str_starts_with($value, '+9665'))) {
@@ -40,11 +39,15 @@ class AuthController extends Controller
                     return $fail("The {$attribute} must be 13 digits long if it starts with '+9665'.");
                 }
             }],
-            'name'  => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
         ]);
 
         $phoneNumber = $request->input('phone_number');
+
+        // 🔴 **Prevent already verified users from requesting OTP again**
+        $existingSubscriber = Subscriber::where('phone_number', $phoneNumber)->first();
+        if ($existingSubscriber && $existingSubscriber->verified) {
+            return back()->withErrors(['phone_number' => 'This phone number is already verified and cannot request another OTP.']);
+        }
 
         // Rate limiting: e.g., 3 attempts per 60 seconds per phone number.
         $key = 'otp:' . $phoneNumber;
@@ -62,19 +65,18 @@ class AuthController extends Controller
         // Retrieve or create subscriber by phone number.
         $subscriber = Subscriber::firstOrNew(['phone_number' => $phoneNumber]);
         if (!$subscriber->exists) {
-            $subscriber->name  = $request->input('name');
-            $subscriber->email = $request->input('email'); // Will be null if not provided.
+            $subscriber->name  = $request->input('name', null); // Optional name field
+            $subscriber->email = $request->input('email', null); // Optional email field
         }
         $subscriber->otp_code       = $otp;
-        $subscriber->otp_expires_at = Carbon::now()->addMinutes(5);
+        $subscriber->otp_expires_at = now()->addMinutes(5);
         $subscriber->save();
 
         // Prepare the OTP message.
         $message = "Your OTP code is: {$otp}";
 
         // Send SMS using your SMS service.
-        $smsResponse = $this->smsService->sendSms($phoneNumber, $message);
-        // Optionally log or inspect $smsResponse for debugging.
+        $this->smsService->sendSms($phoneNumber, $message);
 
         // Redirect to the OTP verification form, carrying the phone number.
         return redirect()->route('otp.verify.form')->with('phone_number', $phoneNumber);
@@ -92,19 +94,81 @@ class AuthController extends Controller
         // If too many attempts
         if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
             $seconds = RateLimiter::availableIn($rateLimitKey);
-            // Return an error or throw an exception
             abort(429, 'Too many OTP requests. Please try again in ' . $seconds . ' seconds.');
         }
 
         // Record this attempt, expire in X seconds/minutes
-        RateLimiter::hit($rateLimitKey, 60);  // e.g. 60 seconds
+        RateLimiter::hit($rateLimitKey, 60);  // e.g., 60 seconds
     }
-
     public function showOtpForm()
     {
         // Show a form where user inputs the OTP
         return view('auth.otp');
     }
+    /*
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'phone_number' => 'required',
+            'otp_code'     => 'required|numeric',
+        ]);
+
+        // Use the Subscriber model since phone numbers are stored there.
+        $subscriber = Subscriber::where('phone_number', $request->phone_number)->first();
+
+        if (!$subscriber) {
+            return back()->withErrors(['phone_number' => 'Phone not found.']);
+        }
+
+        // Rate limit OTP verification attempts.
+        $rateLimitKey = 'otp-verify:' . $subscriber->phone_number;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+            return back()->withErrors(['otp_code' => "Too many attempts. Try again in {$seconds}s"]);
+        }
+        RateLimiter::hit($rateLimitKey, 300); // e.g., 5 min decay
+
+        // Verify OTP: ensure the OTP matches and hasn't expired.
+        if ($subscriber->otp_code == $request->otp_code
+            && $subscriber->otp_expires_at
+            && $subscriber->otp_expires_at->isFuture()) {
+
+            // Clear OTP values.
+            $subscriber->otp_code = null;
+            $subscriber->otp_expires_at = null;
+            $subscriber->save();
+
+            // Retrieve an unused coupon.
+            $coupon = Coupon::whereNull('used_at')->first();
+            if (!$coupon) {
+                return back()->withErrors(['coupon' => 'No coupon available at the moment.']);
+            }
+
+            // Mark the coupon as used and, if desired, associate it with this subscriber.
+            $coupon->used_at = Carbon::now();
+            $coupon->subscriber_id = $subscriber->id; // ensure your coupons table has this column, if needed
+            $coupon->save();
+
+            // Prepare the coupon SMS message.
+            $smsMessage = "Congratulations! Your coupon code is: {$coupon->code}";
+
+            // Send the coupon code via SMS.
+            $this->smsService->sendSms($subscriber->phone_number, $smsMessage);
+
+            // Clear rate limit attempts on success.
+            RateLimiter::clear($rateLimitKey);
+
+            // Redirect to the coupon display page, optionally with the coupon code.
+            return redirect()->route('coupon.show')->with([
+                'phone_number' => $subscriber->phone_number,
+                'coupon_code'  => $coupon->code,
+            ]);
+        }
+
+        // OTP invalid or expired.
+        return back()->withErrors(['otp_code' => 'Invalid or expired OTP.']);
+    }
+*/
     public function verifyOtp(Request $request)
     {
         $request->validate([
@@ -112,34 +176,37 @@ class AuthController extends Controller
             'otp_code' => 'required|numeric',
         ]);
 
-        $user = User::where('phone_number', $request->phone_number)->first();
+        $subscriber = Subscriber::where('phone_number', $request->phone_number)->first();
 
-        if (!$user) {
+        if (!$subscriber) {
             return back()->withErrors(['phone_number' => 'Phone not found.']);
         }
 
-        // Optionally rate limit attempts to verify
-        $rateLimitKey = 'otp-verify:' . $user->phone_number;
+        // Rate limit OTP verification attempts.
+        $rateLimitKey = 'otp-verify:' . $subscriber->phone_number;
         if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
             $seconds = RateLimiter::availableIn($rateLimitKey);
             return back()->withErrors(['otp_code' => "Too many attempts. Try again in {$seconds}s"]);
         }
-        RateLimiter::hit($rateLimitKey, 300); // e.g., 5 min decay
+        RateLimiter::hit($rateLimitKey, 300);
 
-        // Now check OTP
-        if ($user->otp_code == $request->otp_code && $user->otp_expires_at && $user->otp_expires_at->isFuture()) {
-            // OTP valid -> reset, proceed
-            $user->otp_code = null;
-            $user->otp_expires_at = null;
-            $user->save();
+        // Verify OTP: ensure the OTP matches and hasn't expired.
+        if ($subscriber->otp_code == $request->otp_code && $subscriber->otp_expires_at && $subscriber->otp_expires_at->isFuture()) {
+
+            // ✅ **Mark the phone as verified so it can't request OTP again**
+            $subscriber->otp_code = null;
+            $subscriber->otp_expires_at = null;
+            $subscriber->verified = true;
+            $subscriber->save();
+
 
             // Clear rate limit attempts on success
             RateLimiter::clear($rateLimitKey);
 
-            return redirect()->route('coupon.show')->with(['phone_number' => $user->phone_number]);
+            return redirect()->route('coupon.show')->with(['phone_number' => $subscriber->phone_number]);
         }
 
-        // OTP invalid
+        // OTP invalid or expired
         return back()->withErrors(['otp_code' => 'Invalid or expired OTP.']);
     }
 }
