@@ -26,20 +26,20 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create 50 fake subscribers
-        Subscriber::factory()->count(50)->create();
+        //Subscriber::factory()->count(50)->create();
 
         // Create 100 fake coupons
-        Coupon::factory()->count(100)->create()->each(function($coupon) {
-            // Randomly mark about 50% of the coupons as used.
-            if (rand(0, 1)) {
-                $coupon->is_used = true;
-                // Assign a random subscriber if available.
-                $subscriber = Subscriber::inRandomOrder()->first();
-                $coupon->used_by = $subscriber ? $subscriber->id : null;
-                // Set a used_at date within the last 30 days.
-                $coupon->used_at = now()->subDays(rand(0, 30));
-                $coupon->save();
-            }
-        });
+        // Coupon::factory()->count(100)->create()->each(function($coupon) {
+        //     // Randomly mark about 50% of the coupons as used.
+        //     if (rand(0, 1)) {
+        //         $coupon->is_used = true;
+        //         // Assign a random subscriber if available.
+        //         $subscriber = Subscriber::inRandomOrder()->first();
+        //         $coupon->used_by = $subscriber ? $subscriber->id : null;
+        //         // Set a used_at date within the last 30 days.
+        //         $coupon->used_at = now()->subDays(rand(0, 30));
+        //         $coupon->save();
+        //     }
+        // });
     }
 }
